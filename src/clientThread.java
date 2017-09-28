@@ -68,20 +68,41 @@ class clientThread extends Thread {
           }
 
             while (true) {
+                System.out.println("Enter Student ID you want to send messege");
+                for (int i = 0; i < maxClientsCount; i++) {
+                    if (threads[i] == this) {
+                        threads[i].os.println("\"Enter Student ID <SPACE> FILE Path\"");
+                    }
+                }
                 line = is.readLine().trim();
                 if (line.startsWith("logout")) {
                     break;
                 }
+                String []lineArray=line.split(" ");
+                if(studentMap.get(lineArray[0])!=null) { //successful hobe ..tai oi thread e messege ta dibo arki
+                    for (int i = 0; i < maxClientsCount; i++) {
+                        if (threads[i] == studentMap.get(lineArray[0])) {
+                            studentMap.get(lineArray[0]).os.println("< " + name + " >" + line);
+                        }
+                    }
+                }
+                else{ //successfull hoy nai..tai offline je oita ei thread e print korbo
+                    for (int i = 0; i < maxClientsCount; i++) {
+                        if (threads[i] == this) {
+                            threads[i].os.println("ERROR : : :  " + "<" + lineArray[0] + "> " + "is offline or invalid");
+                        }
+                    }
+                }
+                /*
                 for (int i = 0; i < maxClientsCount; i++) {
                     if (threads[i] != null) {
                         threads[i].os.println("<" + name + "> " + line);
                     }
-                }
+                }  ei comment er majhe ja ase ta sobaike notify korbe*/
             }
             for (int i = 0; i < maxClientsCount; i++) {
                 if (threads[i] != null && threads[i] != this) {
-                    threads[i].os.println("*** The user " + name
-                            + " is leaving the chat room !!! ***");
+                    threads[i].os.println("*** The "+ name +" just logged out ");
                 }
             }
             studentMap.remove(name);
