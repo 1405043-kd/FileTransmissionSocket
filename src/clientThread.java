@@ -7,22 +7,7 @@ import java.util.Map;
 /**
  * Created by USER on 9/28/2017.
  */
-/*
- * The chat client thread. This client thread opens the input and the output
- * streams for a particular client, ask the client's name, informs all the
- * clients connected to the server about the fact that a new client has joined
- * the chat room, and as long as it receive data, echos that data back to all
- * other clients. When a client leaves the chat room this thread informs also
- * all the clients about that and terminates.
- */
-/*
- * The chat client thread. This client thread opens the input and the output
- * streams for a particular client, ask the client's name, informs all the
- * clients connected to the server about the fact that a new client has joined
- * the chat room, and as long as it receive data, echos that data back to all
- * other clients. When a client leaves the chat room this thread informs also
- * all the clients about that and terminates.
- */
+
 class clientThread extends Thread {
 
     private DataInputStream is = null;
@@ -64,6 +49,7 @@ class clientThread extends Thread {
                       studentMap.put(name, threads[i]);
                       threads[i].os.println("Student ID " + name + " online now");
                       os.println("Student ID " + name + " login done. Write \" logout \" to logout");
+                      //eita diye sob thread e khobor pathabo je ekjon online hoise.. yeyeyeye
                       for (int j = 0; j < maxClientsCount; j++) {
                           if (threads[j] != null && threads[j] != this) {
                               threads[j].os.println("Student ID " + name + " online now");
@@ -98,6 +84,7 @@ class clientThread extends Thread {
                             + " is leaving the chat room !!! ***");
                 }
             }
+            studentMap.remove(name);
             os.println("*** Bye " + name + " ***");
 
       /*
