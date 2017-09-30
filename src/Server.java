@@ -1,32 +1,31 @@
 /**
  * Created by USER on 9/27/2017.
  */
-import java.io.DataInputStream;
-import java.io.PrintStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 import java.net.ServerSocket;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/*
- * A chat server that delivers public and private messages.
- */
+
 public class Server {
 
     // The server socket.
     private static ServerSocket serverSocket = null;
     // The client socket.
     private static Socket clientSocket = null;
-
+    private DataInputStream dis = null;
+    private DataOutputStream oOs= null;
+    private InputStream is= null;
+    private OutputStream os = null;
     // This chat server can accept up to maxClientsCount clients' connections.
     private static final int maxClientsCount = 100;
     private static final clientThread[] threads = new clientThread[maxClientsCount];
     private static final Map<String,clientThread> studentMap = new ConcurrentHashMap<String,clientThread>();
-
+    private static byte[] mybytearray=null;
     public static void main(String args[]) {
 
-        // The default port number.
+
         int portNumber = 2222;
         if (args.length < 1) {
             System.out
@@ -36,20 +35,14 @@ public class Server {
             portNumber = Integer.valueOf(args[0]).intValue();
         }
 
-    /*
-     * Open a server socket on the portNumber (default 2222). Note that we can
-     * not choose a port less than 1023 if we are not privileged users (root).
-     */
+
         try {
             serverSocket = new ServerSocket(portNumber);
         } catch (IOException e) {
             System.out.println(e);
         }
 
-    /*
-     * Create a client socket for each connection and pass it to a new client
-     * thread.
-     */
+
         while (true) {
             try {
                 clientSocket = serverSocket.accept();
@@ -57,15 +50,49 @@ public class Server {
                 for (i = 0; i < maxClientsCount; i++) {
                     if (threads[i] == null) {
                         (threads[i] = new clientThread(clientSocket, threads, studentMap)).start();
+                       // DataOutputStream os = new DataOutputStream(clientSocket.getOutputStream());
+                      //  os.writeBytes("LeftOut");
                         break;
                     }
                 }
+
                 if (i == maxClientsCount) {
                     PrintStream os = new PrintStream(clientSocket.getOutputStream());
                     os.println("Server too busy. Try later.");
                     os.close();
                     clientSocket.close();
                 }
+            //    while(true){
+                    //file receive end/
+                /*
+                    ObjectInputStream oIs=new ObjectInputStream(clientSocket.getInputStream());
+
+
+                    int current=0;
+                    int bytesRead;
+                    String filePath = new File("").getAbsolutePath()+"\\a.pdf";
+                    FileOutputStream fos = new FileOutputStream(filePath);
+                    BufferedOutputStream bos = new BufferedOutputStream(fos);
+                    mybytearray=new byte[6535555];
+                    System.out.println("hehe");
+                    bytesRead = oIs.read(mybytearray,0,mybytearray.length);
+                         System.out.println(bytesRead);
+                     current = bytesRead;
+
+                    do {
+                        bytesRead =
+                                oIs.read(mybytearray, current, (mybytearray.length-current));
+                        if(bytesRead >= 0) current += bytesRead;
+                    } while(bytesRead > -1);
+
+                    bos.write(mybytearray, 0 , mybytearray.length);
+                    bos.flush();
+                    DataOutputStream oOs= new DataOutputStream(clientSocket.getOutputStream());
+                    System.out.println("DOne");
+                    oOs.writeBytes("YES");
+*/
+              //  }
+
             } catch (IOException e) {
                 System.out.println(e);
             }
