@@ -5,6 +5,8 @@ import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import static com.sun.org.apache.xalan.internal.lib.ExsltStrings.split;
+
 public class Client {
 
     private static int MaxBuf=6400000;
@@ -21,6 +23,7 @@ public class Client {
     private static BufferedReader inputLine = null;
     private static boolean closed = false;
     private static boolean isLogeed = false;
+    private static boolean isOtherThread = false;
     private static boolean isReading = false;
     private static byte [] mybytearray = null;
     private static byte[][] arrayO= null;
@@ -65,23 +68,33 @@ public class Client {
 
                 while (!closed) {
                      if(isLogeed==true && isReading==false) {
-                         System.out.println("asche");
-                        /* if(fileREAD==true) {
-                            System.out.println("asche");
-                            String s=(String)is.readObject();
-                            if(s.contains("no file"))
-                                fileREAD=false;
-
-                        }*/
+                         os.writeObject("justchecking");
                         String responseLine="";
-                        synchronized (is) {
-                            responseLine = (String) is.readObject();
-                        }
+                         responseLine = (String) is.readObject();
+                         System.out.println(responseLine);
+
                         if(responseLine.contains("login")){
-                            System.out.println("brrooo");
+                            System.out.println("brr");
                         }
+                        if(responseLine.contains("nofilegive")){
+                           // os.writeObject("hola");
+                        }
+                      /*   String []responseArray=responseLine.split(" ");
+                         if(responseArray.length==3){
+                             System.out.println(responseLine);
+                             os.writeObject("hola");
+                             isReading=true;
+                             isOtherThread=true;
+                         }  */
                         // input e je file name dibe oita buffer e jabe
-                        String[] lineArray = inputLine.readLine().trim().split(" ");
+                         String inputStr=inputLine.readLine().trim();
+                         if(inputStr.contains("logout")){
+                             System.out.println("Done For");
+                             os.writeObject("logout");
+                             break;
+                         }
+                        String[] lineArray = inputStr.split(" ");
+                         System.out.println(lineArray.length);
                         String filePath = new File("").getAbsolutePath();
                         filePath = filePath + "\\" + lineArray[1];
                         toReceive = lineArray[0];
@@ -92,12 +105,14 @@ public class Client {
                         mybytearray=new byte[(int)file.length()];
                         bis.read(mybytearray,0,(int)file.length());
                         System.out.println(filePath);
-                        os.writeObject(filePath);
+                        os.writeObject(filePath+" "+toReceive);
                         responseLine="";
                         responseLine = (String) is.readObject();
 
+
                         if(responseLine.contains("overflowed")){
                             System.out.println("NOT POSSIBLE: TOO BIG TO HANDLE");
+                            os.writeObject("not possible");
                         }
                         else if(responseLine.contains("ready")){
                             System.out.println(responseLine);
@@ -121,15 +136,16 @@ public class Client {
                         }
 
                      }
+
+
+
                      else if(isLogeed==false && isReading==false){
                          String responseLine="";
                          responseLine=(String)is.readObject();
                          if(responseLine.contains("login done")) {
                              isLogeed = true;
                              System.out.println(responseLine);
-                             synchronized (os) {
-                                 os.writeObject(responseLine);
-                             }
+                           //  os.writeObject(responseLine);
                              continue;
                          }
 
@@ -138,25 +154,23 @@ public class Client {
                         // continue;
                      }
                      if(isReading==true){
-                      //   int chunks = mybytearray.length / chunkSize;
-                      //   int bytesRead=0;
-                         String responseLine="succeed";
-                       //  curr=0;
+                         //   int chunks = mybytearray.length / chunkSize;
+                         //   int bytesRead=0;
+                         String responseLine = "succeed";
+                         //  curr=0;
                          // System.out.println(mybytearray);
-                         synchronized (os) {
-                             os.writeObject(arrayO[curr]);
-                         }
-                         curr+=1;
-                         responseLine=(String)is.readObject();
+                         os.writeObject(arrayO[curr]);
+                         curr += 1;
+                         responseLine = (String) is.readObject();
                          System.out.println(responseLine);
-                         if(!responseLine.contains("some")){
-                             synchronized (os) {
-                                 os.writeObject("hehe");
-                             }
-                             curr=0;chunks=0;isReading=false;fileREAD=true;
+                         if (!responseLine.contains("some")) {
+                          //   os.writeObject("hehe");   //////jokhon pora sesh
+                             curr = 0;
+                             chunks = 0;
+                             isReading = false;
+                             fileREAD = true;
                              continue;
                          }
-
                      }
                     //os.println("JOJO");
                 }
@@ -173,6 +187,8 @@ public class Client {
             }
         }
     }
+
+
 
     /*
      * Create a thread to read from the server. (non-Javadoc)

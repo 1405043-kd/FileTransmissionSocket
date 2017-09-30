@@ -21,8 +21,8 @@ public class Server {
     // This chat server can accept up to maxClientsCount clients' connections.
     private static final int maxClientsCount = 100;
     private static final clientThread[] threads = new clientThread[maxClientsCount];
-    private static final Map<String,clientThread> studentMap = new ConcurrentHashMap<String,clientThread>();
-    private static byte[] mybytearray=null;
+    private static  Map<String,clientThread> studentMap = new ConcurrentHashMap<String,clientThread>();
+    private static  byte[][][] arrayO=new byte[100][][];
     public static void main(String args[]) {
 
 
@@ -49,7 +49,7 @@ public class Server {
                 int i = 0;
                 for (i = 0; i < maxClientsCount; i++) {
                     if (threads[i] == null) {
-                        (threads[i] = new clientThread(clientSocket, threads, studentMap)).start();
+                        (threads[i] = new clientThread(clientSocket, threads, studentMap,arrayO)).start();
                        // DataOutputStream os = new DataOutputStream(clientSocket.getOutputStream());
                       //  os.writeBytes("LeftOut");
                         break;
