@@ -177,9 +177,11 @@ class clientThread extends Thread {
                     if(current>=chunks) {
                         isReading = false;
                         arrayO[fileID]=getMybytearray;
+                            os.writeObject(Integer.toString(getMybytearray.length*getMybytearray[0].length));
+
                         fileID++;
 
-                            os.writeObject("done");
+
 
                         System.out.println("y");
                         continue;
