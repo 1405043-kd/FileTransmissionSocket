@@ -120,14 +120,14 @@ class clientThread extends Thread implements Serializable {
                         String[] lineArray = line.split(" ");
                         extraByteArr=new byte[arrayO[Integer.parseInt(lineArray[0])].length][];
                         extraByteArr=arrayO[Integer.parseInt(lineArray[0])];
-                        os.writeObject("RECEIVESTART"+Integer.toString(arrayO[Integer.parseInt(lineArray[0])].length));
+                        os.writeObject(fileID+",RECEIVESTART,"+Integer.toString(arrayO[Integer.parseInt(lineArray[0])].length));
                         chunks=arrayO[Integer.parseInt(lineArray[0])].length;
                         isWriting=true;
                         flag=false;
                         continue;
                     }
                     if (line.contains("logout")) {
-                        os.writeObject("log out");
+                     //   os.writeObject("log out");
                         break;
                     }
                     else if(line.contains("\\")){

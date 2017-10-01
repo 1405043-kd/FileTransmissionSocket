@@ -32,6 +32,8 @@ public class Client implements Runnable,Serializable{
     private static int curr=0;
     private static String fileID="";
     private static String senderName="";
+    private static File fileDown=null;
+    private static String fileDownloadPath=null;
     public static void main(String[] args) {
 
         // The default port.
@@ -56,7 +58,7 @@ public class Client implements Runnable,Serializable{
             try {
                 new Thread(new Client()).start();
 
-                while (!closed) {
+                while (true) {
                     /*
                      if(isLogeed==true && isReading==false) {
                          os.writeObject("justchecking");
@@ -209,8 +211,11 @@ public class Client implements Runnable,Serializable{
                         else
                             os.writeObject(inputStr);
                     }
-                    if(inputStr.contains("logout"))
+                    if(inputStr.contains("logout")) {
+                        os.writeObject("logout");
+                        closed=true;
                         break;
+                    }
 
                 }
                 os.close();
@@ -224,7 +229,7 @@ public class Client implements Runnable,Serializable{
 
     @Override
     public void run() {
-        while (true) {
+        while (!closed) {
             //sleep for 3000ms (approx)
             long timeToSleep = 300;
             long start, end, slept;
@@ -284,7 +289,7 @@ public class Client implements Runnable,Serializable{
                         fileID=lineArray[0];
                         senderName=lineArray[1];
                         try {
-                            System.out.println("YES to receive, NO to decline");
+                            System.out.println("\"YES\" <ENTER> \"CONTINUE\">to receive, NO to decline");
                             os.writeObject(senderName+" "+inputLine.readLine().trim()+" "+fileID);
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -311,10 +316,14 @@ public class Client implements Runnable,Serializable{
                 else if(response.contains("RECEIVE")){
                     fileREAD=true;
                     System.out.println("shihiihiasdfasdf");
-                    String numberOnly = response.replaceAll("[^0-9]", "");
-                    System.out.println(numberOnly);
+                  //  String numberOnly = response.replaceAll("[^0-9]", "");
+                    String stringArray[]=response.split(",");
+                    System.out.println(stringArray[2]);
+                    fileDownloadPath= new File("").getAbsolutePath();
+                    fileDownloadPath = fileDownloadPath + "\\fileID" + stringArray[0];
+                    fileDown=new File(fileDownloadPath);
                     curr=0;
-                    chunks = Integer.parseInt(numberOnly);
+                    chunks = Integer.parseInt(stringArray[2]);
                     arrayO = new byte[chunks][chunkSize];
                     try {
                         os.writeObject("startSending");
@@ -363,7 +372,24 @@ public class Client implements Runnable,Serializable{
                     fileREAD=false;
                     curr=0;
                     downLoadArray=new byte[chunks*100];
-                    
+                    for (int i = 0; i < chunks; i++) {
+                        for (int j = 0; j < chunkSize; j++) {
+                            downLoadArray[i * chunkSize + j]=arrayO[i][j];
+                        }
+                    }
+                    FileOutputStream fileOutputStream= null;
+                    try {
+                        fileOutputStream = new FileOutputStream(fileDown);
+                        BufferedOutputStream bufferedOutputStream=new BufferedOutputStream(fileOutputStream);
+                        bufferedOutputStream.write(downLoadArray,0,downLoadArray.length);
+                        bufferedOutputStream.flush();
+
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
                     try {
                         os.writeObject("downloadComplete");
                     } catch (IOException e) {
