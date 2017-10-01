@@ -10,15 +10,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Server {
 
-    // The server socket.
+
     private static ServerSocket serverSocket = null;
-    // The client socket.
     private static Socket clientSocket = null;
     private DataInputStream dis = null;
     private DataOutputStream oOs= null;
     private InputStream is= null;
     private OutputStream os = null;
-    // This chat server can accept up to maxClientsCount clients' connections.
     private static final int maxClientsCount = 100;
     private static final clientThread[] threads = new clientThread[maxClientsCount];
     private static  Map<String,clientThread> studentMap = new ConcurrentHashMap<String,clientThread>();
@@ -28,13 +26,10 @@ public class Server {
 
         int portNumber = 2222;
         if (args.length < 1) {
-            System.out
-                    .println("Usage: java MultiThreadChatServer <portNumber>\n"
-                            + "Now using port number=" + portNumber);
+            System.out.println("Port number=" + portNumber);
         } else {
             portNumber = Integer.valueOf(args[0]).intValue();
         }
-
 
         try {
             serverSocket = new ServerSocket(portNumber);

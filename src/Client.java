@@ -4,7 +4,6 @@
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
-
 import static com.sun.org.apache.xalan.internal.lib.ExsltStrings.split;
 
 public class Client implements Runnable,Serializable{
@@ -14,11 +13,8 @@ public class Client implements Runnable,Serializable{
     private static int chunks;
     private static boolean fileREAD=false;
     private static String response="";
-    // client socket
     private static Socket clientSocket = null;
-    // The output stream
     private static ObjectOutputStream os = null;
-    // The input stream
     private static ObjectInputStream is = null;
     private static String toReceive = "";
     private static BufferedReader inputLine = null;
@@ -36,9 +32,8 @@ public class Client implements Runnable,Serializable{
     private static String fileDownloadPath=null;
     public static void main(String[] args) {
 
-        // The default port.
+
         int portNumber = 2222;
-        // The default host.
         String host = "localhost";
 
 
@@ -406,7 +401,7 @@ public class Client implements Runnable,Serializable{
                 }
                 else try {
                     os.writeObject("startSending");
-                    System.out.println("receivedFileCHUNK");
+                   // System.out.println("receivedFileCHUNK");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

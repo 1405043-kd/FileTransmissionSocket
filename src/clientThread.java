@@ -66,43 +66,44 @@ class clientThread extends Thread implements Serializable {
           //  osF = new ObjectOutputStream(clientSocket.getOutputStream());
          //   ObjectInputStream isF = new ObjectInputStream(clientSocket.getInputStream());
             int cou=0;
-          while(cou<100) {
-              int i=0;
-              os.writeObject("EnterStudentID:");
-             // name = is.readLine().trim();
-              try {
-                  name=(String)is.readObject();
-                  //eikhane map korbo student ID'r accord e
-                  for (i = 0; i < maxClientsCount; i++) {
-                      if(name.contains("NOTLO")){
-                          os.writeObject("Failure as not logged in");
-                          continue;
-                      }
-                      if (threads[i] == this && studentMap.get(name) == null) {
-                          studentMap.put(name, threads[i]);
-                        //  threads[i].os.writeObject("Student ID " + name + " online now");
-                          os.writeObject("Student ID " + name + " login done. Write \" logout \" to logout");
-                          //eita diye sob thread e khobor pathabo je ekjon online hoise.. yeyeyeye
+            while(cou<100) {
+               int i=0;
+               os.writeObject("EnterStudentID:");
+               // name = is.readLine().trim();
+               try {
+                   name=(String)is.readObject();
+                   //eikhane map korbo student ID'r accord e
+                   for (i = 0; i < maxClientsCount; i++) {
+                       if(name.contains("NOTLO")){
+                           os.writeObject("Failure as not logged in");
+                           continue;
+                       }
+                       if (threads[i] == this && studentMap.get(name) == null) {
+                           studentMap.put(name, threads[i]);
+                           //  threads[i].os.writeObject("Student ID " + name + " online now");
+                           os.writeObject("Student ID " + name + " login done. Write \" logout \" to logout");
+                           //eita diye sob thread e khobor pathabo je ekjon online hoise.. yeyeyeye
                       /*    for (int j = 0; j < maxClientsCount; j++) {
                               if (threads[j] != null && threads[j] != this) {
                                   threads[j].os.writeObject("Student ID " + name + " online now");
                               }
                           }  */
-                          System.out.println("hi hi");
-                          break;
-                      } else if (threads[i] == this && studentMap.get(name) != null) {
-                          threads[i].os.writeObject("Student ID already logged in");
-                      }
-                  }
-              } catch (ClassNotFoundException e) {
-                  e.printStackTrace();
-              }
+                           System.out.println("hi hi");
+                           break;
+                       }
+                       else if (threads[i] == this && studentMap.get(name) != null) {
+                           threads[i].os.writeObject("Student ID already logged in");
+                       }
+                   }
+               } catch (ClassNotFoundException e) {
+                   e.printStackTrace();
+               }
 
           //    System.out.println("ki ki ki");
               //mapping done
-              if(i<maxClientsCount) cou=10000;
-              cou++;
-          }
+               if(i<maxClientsCount) cou=10000;
+               cou++;
+            }
 
 /* **file to be sent here now on..and using the isReading things :p */
         while (true) {
