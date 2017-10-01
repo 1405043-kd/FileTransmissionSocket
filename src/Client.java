@@ -289,7 +289,7 @@ public class Client implements Runnable,Serializable{
                         fileID=lineArray[0];
                         senderName=lineArray[1];
                         try {
-                            System.out.println("\"YES\" <ENTER> \"CONTINUE\">to receive, NO to decline");
+                            System.out.println("Write< \"YES\" <ENTER> \"CONTINUE\" >to receive, \"NO\" to decline");
                             os.writeObject(senderName+" "+inputLine.readLine().trim()+" "+fileID);
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -297,7 +297,7 @@ public class Client implements Runnable,Serializable{
                     }
                 }
                 else if (response.contains("overflowed")) {
-                    System.out.println("NOT possible transition, buffer crossed");
+                    System.out.println("TRANSITION NOT POSSIBLE__BUFFER OVERFLOW");
                 }
                 else if (response.contains("ready")) {
                     String numberOnly = response.replaceAll("[^0-9]", "");
@@ -315,7 +315,7 @@ public class Client implements Runnable,Serializable{
                 }
                 else if(response.contains("RECEIVE")){
                     fileREAD=true;
-                    System.out.println("shihiihiasdfasdf");
+                    System.out.println("Receive_found_Trail");
                   //  String numberOnly = response.replaceAll("[^0-9]", "");
                     String stringArray[]=response.split(",");
                     System.out.println(stringArray[2]);
@@ -341,6 +341,7 @@ public class Client implements Runnable,Serializable{
                     e.printStackTrace();
                 }
                 curr += 1;
+                long testTime = System.currentTimeMillis();
                 try {
                     response = (String) is.readObject();
                 } catch (IOException e) {
@@ -348,9 +349,14 @@ public class Client implements Runnable,Serializable{
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
+                if(testTime >= (System.currentTimeMillis()+ 29*1000)) { //multiply by 1000 to get milliseconds
+                    response="ERROR";
+                    System.out.println("TIME OUT");
+                }
                 System.out.println(response+" "+curr);
 
-                if (!response.contains("Some")) {
+
+                if (!response.contains("ServerResponseCHUNK_RECEIVED")) {
                     curr = 0;
                     chunks = 0;
                     isReading = false;
@@ -366,7 +372,7 @@ public class Client implements Runnable,Serializable{
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
-                System.out.println("ekta");
+                System.out.println("receivedFileCHUNK "+curr);
                 curr++;
                 if(curr>=chunks){
                     fileREAD=false;
@@ -400,7 +406,7 @@ public class Client implements Runnable,Serializable{
                 }
                 else try {
                     os.writeObject("startSending");
-                    System.out.println("received");
+                    System.out.println("receivedFileCHUNK");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

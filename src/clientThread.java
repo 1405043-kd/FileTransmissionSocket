@@ -161,17 +161,24 @@ class clientThread extends Thread implements Serializable {
             else if(isReading==true && isWriting==false) {
                 String ss = "";
                     //read korte thakbe :3
+                    long testTime = System.currentTimeMillis();
                     synchronized (is) {
                         mybytearray = (byte[]) is.readObject();
                     }
-                    System.out.println(mybytearray);
-                    getMybytearray[current] = mybytearray;
+                    if(testTime >= (System.currentTimeMillis()+ 29*1000)) { //multiply by 1000 to get milliseconds
+                        current=chunks+1;
+                        System.out.println("TIME OUT");
+                    }
+                    else {
+                        System.out.println(mybytearray);
+                        getMybytearray[current] = mybytearray;
+                    }
                     current += 1;
                     if (current >= chunks) {
                         isReading = false;
                         current = 0;
                         if (studentMap.get(toReceive) == null) {
-                            os.writeObject("Not available user now");
+                            os.writeObject("USER NOT AVAILABLE");
                             continue;
                         }
                         System.out.println(Integer.toString(fileID) + " " + name + " " + Integer.toString(getMybytearray.length * getMybytearray[0].length));
@@ -183,7 +190,7 @@ class clientThread extends Thread implements Serializable {
                         System.out.println("y");
                         continue;
                     } else {
-                        os.writeObject("readSome");
+                        os.writeObject("ServerResponseCHUNK_RECEIVED");
                     }
                 }
 
@@ -194,7 +201,7 @@ class clientThread extends Thread implements Serializable {
 
 
             else if(isReading==false && isWriting==true) {
-                System.out.println("come here!!" + chunks);
+                System.out.println("came_here!!" + chunks);
                 line = "";
                 line = (String) is.readObject();
                 if(line.contains("startSending")) {
