@@ -412,11 +412,6 @@ public class Client implements Runnable,Serializable{
 
 
 
-    /*
-     * Create a thread to read from the server. (non-Javadoc)
-     *
-     * @see java.lang.Runnable#run()
-     */
   /*  public void run() {
 
         String responseLine;
