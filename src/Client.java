@@ -401,7 +401,7 @@ public class Client implements Runnable,Serializable{
                 }
                 else try {
                     os.writeObject("startSending");
-                   // System.out.println("receivedFileCHUNK");
+                   // System.out.println("receivedFileCHUNL");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
