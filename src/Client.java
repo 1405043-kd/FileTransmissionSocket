@@ -7,27 +7,31 @@ import java.net.UnknownHostException;
 
 import static com.sun.org.apache.xalan.internal.lib.ExsltStrings.split;
 
-public class Client {
+public class Client implements Runnable,Serializable{
 
     private static int MaxBuf=6400000;
     private static int chunkSize=100;
     private static int chunks;
     private static boolean fileREAD=false;
+    private static String response="";
     // client socket
     private static Socket clientSocket = null;
     // The output stream
     private static ObjectOutputStream os = null;
     // The input stream
     private static ObjectInputStream is = null;
-    private static String toReceive = null;
+    private static String toReceive = "";
     private static BufferedReader inputLine = null;
     private static boolean closed = false;
     private static boolean isLogeed = false;
     private static boolean isOtherThread = false;
     private static boolean isReading = false;
     private static byte [] mybytearray = null;
+    private static byte [] downLoadArray=null;
     private static byte[][] arrayO= null;
     private static int curr=0;
+    private static String fileID="";
+    private static String senderName="";
     public static void main(String[] args) {
 
         // The default port.
@@ -35,17 +39,7 @@ public class Client {
         // The default host.
         String host = "localhost";
 
-        /*
-        if (args.length < 2) {
-            System.out
-                    .println("Usage: java MultiThreadChatClient <host> <portNumber>\n"
-                            + "Now using host=" + host + ", portNumber=" + portNumber);
-        } else {
-            host = args[0];
-            portNumber = Integer.valueOf(args[1]).intValue();
-        } */
 
-    // new socket
         try {
             clientSocket = new Socket(host, portNumber);
             inputLine = new BufferedReader(new InputStreamReader(System.in));
@@ -57,16 +51,13 @@ public class Client {
             System.err.println("I/O Exception at " + host);
         }
 
-    /*
-     * If everything has been initialized then write some data to the
-     * socket we have opened a connection to on the port portNumber.
-     */
+
         if (clientSocket != null && os != null && is != null) {
             try {
-
-        /* Create a thread to read from the server. */
+                new Thread(new Client()).start();
 
                 while (!closed) {
+                    /*
                      if(isLogeed==true && isReading==false) {
                          os.writeObject("justchecking");
                         String responseLine="";
@@ -79,13 +70,7 @@ public class Client {
                         if(responseLine.contains("nofilegive")){
                            // os.writeObject("hola");
                         }
-                      /*   String []responseArray=responseLine.split(" ");
-                         if(responseArray.length==3){
-                             System.out.println(responseLine);
-                             os.writeObject("hola");
-                             isReading=true;
-                             isOtherThread=true;
-                         }  */
+
                         // input e je file name dibe oita buffer e jabe
                          String inputStr=inputLine.readLine().trim();
                          if(inputStr.contains("logout")){
@@ -127,10 +112,8 @@ public class Client {
                                 }
                             }
                             curr=0;
-                           /* synchronized (os) {
-                                os.writeObject(mybytearray);  //eta ki chilo?????
-                            } */
-                         //   System.out.println(mybytearray);
+
+
                             continue;
 
                         }
@@ -145,26 +128,23 @@ public class Client {
                          if(responseLine.contains("login done")) {
                              isLogeed = true;
                              System.out.println(responseLine);
-                           //  os.writeObject(responseLine);
+
                              continue;
                          }
 
                          System.out.println(responseLine);
                          os.writeObject(inputLine.readLine().trim());
-                        // continue;
+
                      }
                      if(isReading==true){
-                         //   int chunks = mybytearray.length / chunkSize;
-                         //   int bytesRead=0;
+
                          String responseLine = "succeed";
-                         //  curr=0;
-                         // System.out.println(mybytearray);
+
                          os.writeObject(arrayO[curr]);
                          curr += 1;
                          responseLine = (String) is.readObject();
                          System.out.println(responseLine);
                          if (!responseLine.contains("some")) {
-                          //   os.writeObject("hehe");   //////jokhon pora sesh
                              curr = 0;
                              chunks = 0;
                              isReading = false;
@@ -172,20 +152,235 @@ public class Client {
                              continue;
                          }
                      }
-                    //os.println("JOJO");
+                    */
+
+
+                    //sleep for 3000ms (approx)
+                    long timeToSleep = 300;
+                    long start, end, slept;
+                    boolean interrupted = false;
+
+                    while(timeToSleep > 0){
+                        start=System.currentTimeMillis();
+                        try{
+                            Thread.sleep(timeToSleep);
+                            break;
+                        }
+                        catch(InterruptedException e){
+
+                            //work out how much more time to sleep for
+                            end=System.currentTimeMillis();
+                            slept=end-start;
+                            timeToSleep-=slept;
+                            interrupted=true;
+                        }
+                    }
+
+                    if(interrupted){
+                        //restore interruption before exit
+                        Thread.currentThread().interrupt();
+                    }
+
+                    String inputStr=inputLine.readLine().trim();
+                    String[] lineArray = inputStr.split(" ");
+                    if(lineArray.length==2) {
+                        System.out.println(lineArray.length);
+                        String filePath = new File("").getAbsolutePath();
+                        filePath = filePath + "\\" + lineArray[1];
+                        File file = new File(filePath);
+                        FileInputStream fis = new FileInputStream(file);
+                        BufferedInputStream bis = new BufferedInputStream(fis);
+                        mybytearray=new byte[(int)file.length()];
+                        bis.read(mybytearray,0,(int)file.length());
+                        toReceive = lineArray[0];
+                        filePath=filePath+" "+toReceive;
+                        System.out.println(filePath);
+                        os.writeObject(filePath);
+                    }
+
+                    else if(lineArray.length==1) {
+                        if(inputStr.contains("NO"))
+                            os.writeObject(fileID+" "+"NO"+" "+senderName);
+                        else if(inputStr.contains("YES"))
+                            os.writeObject(fileID+" "+"YES"+" "+senderName);
+                        else if(inputStr.contains("CONTINUE")){
+                            continue;
+                        }
+                        else
+                            os.writeObject(inputStr);
+                    }
+                    if(inputStr.contains("logout"))
+                        break;
+
                 }
-        /*
-         * Close the output stream, close the input stream, close the socket.
-         */
                 os.close();
                 is.close();
                 clientSocket.close();
             } catch (IOException e) {
                 System.err.println("IOException:  " + e);
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
             }
         }
+    }
+
+    @Override
+    public void run() {
+        while (true) {
+            //sleep for 3000ms (approx)
+            long timeToSleep = 300;
+            long start, end, slept;
+            boolean interrupted = false;
+
+            while(timeToSleep > 0){
+                start=System.currentTimeMillis();
+                try{
+                    Thread.sleep(timeToSleep);
+                    break;
+                }
+                catch(InterruptedException e){
+
+                    //work out how much more time to sleep for
+                    end=System.currentTimeMillis();
+                    slept=end-start;
+                    timeToSleep-=slept;
+                    interrupted=true;
+                }
+            }
+
+            if(interrupted){
+                //restore interruption before exit
+                Thread.currentThread().interrupt();
+            }
+
+        //    System.out.println("shit shi");
+            if(isLogeed==false && isReading==false) {
+                try {
+                    response = (String) is.readObject();
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+                System.out.println(response);
+                if (response.contains("login")) {
+                    isLogeed = true;
+                    continue;
+                }
+
+            }
+            else if(isLogeed==true && isReading==false && fileREAD==false) {
+                try {
+                    response = (String) is.readObject();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+                System.out.println(response);
+
+                if (response.contains(" ")){
+                    String[] lineArray = response.split(" ");
+                    if(lineArray.length==3){
+                        fileID=lineArray[0];
+                        senderName=lineArray[1];
+                        try {
+                            System.out.println("YES to receive, NO to decline");
+                            os.writeObject(senderName+" "+inputLine.readLine().trim()+" "+fileID);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                else if (response.contains("overflowed")) {
+                    System.out.println("NOT possible transition, buffer crossed");
+                }
+                else if (response.contains("ready")) {
+                    String numberOnly = response.replaceAll("[^0-9]", "");
+                    System.out.println(numberOnly);
+                    chunks = Integer.parseInt(numberOnly);
+                    arrayO = new byte[chunks][chunkSize];
+                    for (int i = 0; i < chunks; i++) {
+                        for (int j = 0; j < chunkSize; j++) {
+                            if((i*chunkSize +j)<mybytearray.length)
+                                arrayO[i][j] = mybytearray[i * chunkSize + j];
+                            //   System.out.println(mybytearray);
+                        }
+                    }
+                    isReading=true;curr=0;
+                }
+                else if(response.contains("RECEIVE")){
+                    fileREAD=true;
+                    System.out.println("shihiihiasdfasdf");
+                    String numberOnly = response.replaceAll("[^0-9]", "");
+                    System.out.println(numberOnly);
+                    curr=0;
+                    chunks = Integer.parseInt(numberOnly);
+                    arrayO = new byte[chunks][chunkSize];
+                    try {
+                        os.writeObject("startSending");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    continue;
+                }
+            }
+            else if(isLogeed==true && isReading==true && fileREAD==false){
+
+                try {
+                    os.writeObject(arrayO[curr]);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                curr += 1;
+                try {
+                    response = (String) is.readObject();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+                System.out.println(response+" "+curr);
+
+                if (!response.contains("Some")) {
+                    curr = 0;
+                    chunks = 0;
+                    isReading = false;
+                   // fileREAD = true;
+                    continue;
+                }
+            }
+            else if(isLogeed==true && fileREAD==true ){
+                try {
+                    arrayO[curr]= (byte[]) is.readObject();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("ekta");
+                curr++;
+                if(curr>=chunks){
+                    fileREAD=false;
+                    curr=0;
+                    downLoadArray=new byte[chunks*100];
+                    
+                    try {
+                        os.writeObject("downloadComplete");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+
+                }
+                else try {
+                    os.writeObject("startSending");
+                    System.out.println("received");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
     }
 
 
