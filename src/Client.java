@@ -4,12 +4,15 @@
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.BitSet;
+
 import static com.sun.org.apache.xalan.internal.lib.ExsltStrings.split;
 
 public class Client implements Runnable,Serializable{
 
     private static int MaxBuf=6400000;
-    private static int chunkSize=100;
+    private static int chunkSize=1000;
     private static int chunks;
     private static boolean fileREAD=false;
     private static String response="";
@@ -367,12 +370,19 @@ public class Client implements Runnable,Serializable{
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
-                System.out.println("receivedFileCHUNK "+curr);
+                System.out.println("receivedFileCHUNK "+curr+" 0111 "+arrayO[curr]+"001");
+            //    System.out.println( byteArrayToString(arrayO[curr]));
+             //   if(bitDeStuff(bitStuff(arrayO[curr])).equals(toBinary(arrayO[curr]))) System.out.println("yoho");
+             //   System.out.println(bitDeStuff(bitStuff(arrayO[curr])));
+             //   System.out.println(toBinary(arrayO[curr]));
+                if(Arrays.equals(bitDeStuff(bitStuff(arrayO[curr])),arrayO[curr])) System.out.println("yoloho");
+              //  System.out.println(byteArrayToString(stringToByteArray(byteArrayToString(arrayO[curr]))));
+               // System.out.println(byteArrayToString(arrayO[curr]));
                 curr++;
                 if(curr>=chunks){
                     fileREAD=false;
                     curr=0;
-                    downLoadArray=new byte[chunks*100];
+                    downLoadArray=new byte[chunks*chunkSize];
                     for (int i = 0; i < chunks; i++) {
                         for (int j = 0; j < chunkSize; j++) {
                             downLoadArray[i * chunkSize + j]=arrayO[i][j];
@@ -436,4 +446,118 @@ public class Client implements Runnable,Serializable{
             System.err.println("IOException:  " + e);
         }
     } */
+  public long CheckSum(byte[] byteArr){
+        long count=0;
+        for(int i=0;i<byteArr.length;i++){
+            if(byteArr[i]>count) count=byteArr[i];
+        }
+        return count;
+  }
+  public String byteArrayToString(byte[] byteArr){
+      //byte[] b = new byte[]{10};
+      String string="";
+      BitSet bitset = BitSet.valueOf(byteArr);
+
+      //System.out.println("Length of bitset = " + bitset.length());
+      for (int i=0; i<bitset.length(); ++i) {
+         // System.out.println("bit " + i + ": " + bitset.get(i));
+          if(bitset.get(i))
+              string+="1";
+          else string+="0";
+      }
+      return string;
+  }
+  public byte[] stringToByteArray(String string){
+     // byte [] byteArray=new byte[(string.length()+7)/8];
+      byte[] bytes = new byte[(string.length() + 7) / 8];
+      for (int i=0; i<string.length(); i++) {
+          if (string.charAt(i)=='1') {
+              bytes[bytes.length-i/8-1] |= 1<<(i%8);
+          }
+      }
+      return bytes;
+
+  }
+    String toBinary( byte[] bytes )
+    {
+        StringBuilder sb = new StringBuilder(bytes.length * Byte.SIZE);
+        for( int i = 0; i < Byte.SIZE * bytes.length; i++ )
+            sb.append((bytes[i / Byte.SIZE] << i % Byte.SIZE & 0x80) == 0 ? '0' : '1');
+        return sb.toString();
+    }
+    byte[] fromBinary( String s )
+    {
+        int sLen = s.length();
+        byte[] toReturn = new byte[(sLen + Byte.SIZE - 1) / Byte.SIZE];
+        char c;
+        for( int i = 0; i < sLen; i++ )
+            if( (c = s.charAt(i)) == '1' )
+                toReturn[i / Byte.SIZE] = (byte) (toReturn[i / Byte.SIZE] | (0x80 >>> (i % Byte.SIZE)));
+            else if ( c != '0' )
+                throw new IllegalArgumentException();
+        return toReturn;
+    }
+
+
+  public String bitStuff(byte[] byteArr){
+        String s="";
+        String returnString="";
+        int counter=0;
+        s=toBinary(byteArr);
+        for(int i=0;i<s.length();i++)
+        {
+          if(s.charAt(i) == '1')
+          {
+              counter++;
+              returnString = returnString + s.charAt(i);
+          }
+          else
+          {
+              returnString = returnString + s.charAt(i);
+              counter = 0;
+          }
+          if(counter == 5)
+          {
+              returnString = returnString + '0';
+              counter = 0;
+          }
+      }
+      return "01111110"+returnString+"01111110";
+  }
+
+    public byte[] bitDeStuff(String s){
+        //String s="";
+        String returnString="";
+        s=s.replace("01111110","");
+        int counter=0;
+
+        for(int i=0;i<s.length();i++)
+        {
+
+            if(s.charAt(i) == '1')
+            {
+
+                counter++;
+                returnString = returnString + s.charAt(i);
+
+            }
+            else
+            {
+                returnString = returnString + s.charAt(i);
+                counter = 0;
+            }
+            if(counter == 5)
+            {
+                if((i+2)!=s.length())
+                    returnString = returnString + s.charAt(i+2);
+                else
+                    returnString=returnString + '1';
+                i=i+2;
+                counter = 1;
+            }
+        }
+        return fromBinary(returnString);
+      //  return returnString;
+    }
+
 }

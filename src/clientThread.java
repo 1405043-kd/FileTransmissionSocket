@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 class clientThread extends Thread implements Serializable {
 
 
-    private static int MaxBuf=10000;
+    private static int MaxBuf=100000;
     private static int chunkSize=100;
     private int chunks=0;
     private String toReceive="";
@@ -138,9 +138,9 @@ class clientThread extends Thread implements Serializable {
                         System.out.println((int) file.length());
                         System.out.println(toReceive);
                         mybytearray = new byte[(int)file.length()];
-                        chunks=(int)(file.length()+99)/100;
+                        chunks=(int)(file.length()+chunkSize-1)/chunkSize;
                         System.out.println(chunks);
-                        if ((((int) file.length()+99) / 100) > MaxBuf) {
+                        if ((((int) file.length()+chunkSize-1) / chunkSize) > MaxBuf) {
                             os.writeObject("overflowed");
                         }
                         else {
