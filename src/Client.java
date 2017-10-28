@@ -371,10 +371,11 @@ public class Client implements Runnable,Serializable{
                     response="ERROR";
                     System.out.println("TIME OUT");
                 } */
-                System.out.println(response+" "+curr);
+                System.out.println(response);
 
 
                 if (!response.contains("ServerResponseCHUNK_RECEIVED")) {
+           //         System.out.println(response);
                     curr = 0;
                     chunks = 0;
                     isReading = false;

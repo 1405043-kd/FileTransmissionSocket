@@ -197,6 +197,7 @@ class clientThread extends Thread implements Serializable {
              //       }
                     current += 1;
                     if (current >= chunks) {
+                        int toLastPrint=current-1;
                         isReading = false;
                         current = 0;
                         if (studentMap.get(toReceive) == null) {
@@ -206,13 +207,14 @@ class clientThread extends Thread implements Serializable {
                         System.out.println(Integer.toString(fileID) + " " + name + " " + Integer.toString(getMybytearray.length * getMybytearray[0].length));
                         studentMap.get(toReceive).os.writeObject(Integer.toString(fileID) + " " + name + " " + Integer.toString(getMybytearray.length * getMybytearray[0].length));
 
-                        os.writeObject(Integer.toString(getMybytearray.length * getMybytearray[0].length));
+                //        os.writeObject(Integer.toString(getMybytearray.length * getMybytearray[0].length));
+                        os.writeObject("done here by receiving "+toLastPrint);
                         arrayO[fileID] = getMybytearray;
                         fileID++;
                         System.out.println("y");
                         continue;
                     } else {
-                        os.writeObject("ServerResponseCHUNK_RECEIVED");
+                        os.writeObject("ServerResponseCHUNK_RECEIVED "+current);
                     }
                 }
                 ////////   ////////ajker full kaj eitukur moddhei  :p :p yolo
