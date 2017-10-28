@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.Socket;
+import java.util.BitSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -159,21 +160,31 @@ class clientThread extends Thread implements Serializable {
                     e1.printStackTrace();
                 }
             }
+            ////////ajker full kaj eitukur moddhei  :p :p yolo
             else if(isReading==true && isWriting==false) {
-                String ss = "";
+                String stuffedString = "";
+                String deStuffedString="";
                     //read korte thakbe :3
-                    long testTime = System.currentTimeMillis();
+                 //   long testTime = System.currentTimeMillis();
+
                     synchronized (is) {
-                        mybytearray = (byte[]) is.readObject();
+                       // mybytearray = (byte[]) is.readObject();
+                        stuffedString=(String) is.readObject();
                     }
-                    if(testTime >= (System.currentTimeMillis()+ 29*1000)) { //multiply by 1000 to get milliseconds
-                        current=chunks+1;
-                        System.out.println("TIME OUT");
-                    }
-                    else {
-                        System.out.println(mybytearray);
-                        getMybytearray[current] = mybytearray;
-                    }
+              deStuffedString=bitDeStuff(stuffedString);
+                System.out.println("received Pack "+stuffedString);
+                System.out.println("received Pack - Destuffed "+deStuffedString);
+
+           //         if(testTime >= (System.currentTimeMillis()+ 29*1000)) { //multiply by 1000 to get milliseconds
+            //            current=chunks+1;
+            //            System.out.println("TIME OUT");
+             //       }
+               //     else {
+
+                mybytearray=fromBinary(deStuffedString);
+                System.out.println(mybytearray);
+                getMybytearray[current] = mybytearray;
+             //       }
                     current += 1;
                     if (current >= chunks) {
                         isReading = false;
@@ -194,7 +205,7 @@ class clientThread extends Thread implements Serializable {
                         os.writeObject("ServerResponseCHUNK_RECEIVED");
                     }
                 }
-
+                ////////   ////////ajker full kaj eitukur moddhei  :p :p yolo
 
 
 
@@ -239,4 +250,117 @@ class clientThread extends Thread implements Serializable {
             e.printStackTrace();
         }
     }
+
+    public long CheckSum(byte[] byteArr){
+        long count=0;
+        for(int i=0;i<byteArr.length;i++){
+            if(byteArr[i]>count) count=byteArr[i];
+        }
+        return count;
+    }
+    public String byteArrayToString(byte[] byteArr){
+        //byte[] b = new byte[]{10};
+        String string="";
+        BitSet bitset = BitSet.valueOf(byteArr);
+
+        //System.out.println("Length of bitset = " + bitset.length());
+        for (int i=0; i<bitset.length(); ++i) {
+            // System.out.println("bit " + i + ": " + bitset.get(i));
+            if(bitset.get(i))
+                string+="1";
+            else string+="0";
+        }
+        return string;
+    }
+    public byte[] stringToByteArray(String string){
+        // byte [] byteArray=new byte[(string.length()+7)/8];
+        byte[] bytes = new byte[(string.length() + 7) / 8];
+        for (int i=0; i<string.length(); i++) {
+            if (string.charAt(i)=='1') {
+                bytes[bytes.length-i/8-1] |= 1<<(i%8);
+            }
+        }
+        return bytes;
+
+    }
+    String toBinary( byte[] bytes ) {
+        StringBuilder sb = new StringBuilder(bytes.length * Byte.SIZE);
+        for( int i = 0; i < Byte.SIZE * bytes.length; i++ )
+            sb.append((bytes[i / Byte.SIZE] << i % Byte.SIZE & 0x80) == 0 ? '0' : '1');
+        return sb.toString();
+    }
+    byte[] fromBinary( String s ) {
+        int sLen = s.length();
+        byte[] toReturn = new byte[(sLen + Byte.SIZE - 1) / Byte.SIZE];
+        char c;
+        for( int i = 0; i < sLen; i++ )
+            if( (c = s.charAt(i)) == '1' )
+                toReturn[i / Byte.SIZE] = (byte) (toReturn[i / Byte.SIZE] | (0x80 >>> (i % Byte.SIZE)));
+            else if ( c != '0' )
+                throw new IllegalArgumentException();
+        return toReturn;
+    }
+
+
+    public String bitStuff(byte[] byteArr){
+        String s="";
+        String returnString="";
+        int counter=0;
+        s=toBinary(byteArr);
+        for(int i=0;i<s.length();i++)
+        {
+            if(s.charAt(i) == '1')
+            {
+                counter++;
+                returnString = returnString + s.charAt(i);
+            }
+            else
+            {
+                returnString = returnString + s.charAt(i);
+                counter = 0;
+            }
+            if(counter == 5)
+            {
+                returnString = returnString + '0';
+                counter = 0;
+            }
+        }
+        return "01111110"+returnString+"01111110";
+    }
+
+    public String bitDeStuff(String s){
+        //String s="";
+        String returnString="";
+        s=s.replace("01111110","");
+        int counter=0;
+
+        for(int i=0;i<s.length();i++)
+        {
+
+            if(s.charAt(i) == '1')
+            {
+
+                counter++;
+                returnString = returnString + s.charAt(i);
+
+            }
+            else
+            {
+                returnString = returnString + s.charAt(i);
+                counter = 0;
+            }
+            if(counter == 5)
+            {
+                if((i+2)!=s.length())
+                    returnString = returnString + s.charAt(i+2);
+                else
+                    returnString=returnString + '1';
+                i=i+2;
+                counter = 1;
+            }
+        }
+     //   return fromBinary(returnString);
+          return returnString;
+    }
+
 }

@@ -12,7 +12,7 @@ import static com.sun.org.apache.xalan.internal.lib.ExsltStrings.split;
 public class Client implements Runnable,Serializable{
 
     private static int MaxBuf=6400000;
-    private static int chunkSize=1000;
+    private static int chunkSize=100;
     private static int chunks;
     private static boolean fileREAD=false;
     private static String response="";
@@ -331,15 +331,26 @@ public class Client implements Runnable,Serializable{
                     continue;
                 }
             }
-            else if(isLogeed==true && isReading==true && fileREAD==false){
+            ///ajker kaj eitukur moddhei :p yolo
 
+
+            else if(isLogeed==true && isReading==true && fileREAD==false){
+                //bitStuff(arrayO[curr]);
+                try {
+                    System.out.println("Bits to send : "+ toBinary(arrayO[curr]));
+                    System.out.println("Bits to send - Stuffed : "+ bitStuff(arrayO[curr]));
+                    os.writeObject(bitStuff(arrayO[curr]));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                /*
                 try {
                     os.writeObject(arrayO[curr]);
                 } catch (IOException e) {
                     e.printStackTrace();
-                }
+                }*/
                 curr += 1;
-                long testTime = System.currentTimeMillis();
+           //     long testTime = System.currentTimeMillis();
                 try {
                     response = (String) is.readObject();
                 } catch (IOException e) {
@@ -347,10 +358,10 @@ public class Client implements Runnable,Serializable{
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
-                if(testTime >= (System.currentTimeMillis()+ 29*1000)) { //multiply by 1000 to get milliseconds
+                /*if(testTime >= (System.currentTimeMillis()+ 29*1000)) { //multiply by 1000 to get milliseconds
                     response="ERROR";
                     System.out.println("TIME OUT");
-                }
+                } */
                 System.out.println(response+" "+curr);
 
 
@@ -362,6 +373,12 @@ public class Client implements Runnable,Serializable{
                     continue;
                 }
             }
+
+
+            //////////ajker kaj eitukur moddhei
+
+
+
             else if(isLogeed==true && fileREAD==true ){
                 try {
                     arrayO[curr]= (byte[]) is.readObject();
@@ -370,14 +387,14 @@ public class Client implements Runnable,Serializable{
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
-                System.out.println("receivedFileCHUNK "+curr+" 0111 "+arrayO[curr]+"001");
+                System.out.println("receivedFileCHUNK "+curr);
             //    System.out.println( byteArrayToString(arrayO[curr]));
              //   if(bitDeStuff(bitStuff(arrayO[curr])).equals(toBinary(arrayO[curr]))) System.out.println("yoho");
              //   System.out.println(bitDeStuff(bitStuff(arrayO[curr])));
              //   System.out.println(toBinary(arrayO[curr]));
-                if(Arrays.equals(bitDeStuff(bitStuff(arrayO[curr])),arrayO[curr])) System.out.println("yoloho");
+            //    if(Arrays.equals(bitDeStuff(bitStuff(arrayO[curr])),arrayO[curr])) System.out.println("yoloho");
               //  System.out.println(byteArrayToString(stringToByteArray(byteArrayToString(arrayO[curr]))));
-               // System.out.println(byteArrayToString(arrayO[curr]));
+                 System.out.println(toBinary(arrayO[curr]));
                 curr++;
                 if(curr>=chunks){
                     fileREAD=false;
@@ -478,15 +495,13 @@ public class Client implements Runnable,Serializable{
       return bytes;
 
   }
-    String toBinary( byte[] bytes )
-    {
+    String toBinary( byte[] bytes ) {
         StringBuilder sb = new StringBuilder(bytes.length * Byte.SIZE);
         for( int i = 0; i < Byte.SIZE * bytes.length; i++ )
             sb.append((bytes[i / Byte.SIZE] << i % Byte.SIZE & 0x80) == 0 ? '0' : '1');
         return sb.toString();
     }
-    byte[] fromBinary( String s )
-    {
+    byte[] fromBinary( String s ) {
         int sLen = s.length();
         byte[] toReturn = new byte[(sLen + Byte.SIZE - 1) / Byte.SIZE];
         char c;
