@@ -189,34 +189,40 @@ class clientThread extends Thread implements Serializable {
                 System.out.println("seqNumber : "+deStuffedSeq);
                 if(hasCheckSumError(deStuffedBinary, Integer.valueOf(deStuffedCheckSum))==true)
                     System.out.println("No checkSum error found");
-                else
+                else {
                     System.out.println("Error Error Error Danger :o checkSum error found");
+                    os.writeObject("resendFrame "+current);
+                    continue;
+                }
                 mybytearray=fromBinary(deStuffedBinary);
              //   System.out.println(mybytearray);
-                getMybytearray[current] = mybytearray;
+                getMybytearray[Integer.valueOf(deStuffedSeq)] = mybytearray;
              //       }
-                    current += 1;
-                    if (current >= chunks) {
-                        int toLastPrint=current-1;
-                        isReading = false;
-                        current = 0;
-                        if (studentMap.get(toReceive) == null) {
-                            os.writeObject("USER NOT AVAILABLE");
-                            continue;
-                        }
-                        System.out.println(Integer.toString(fileID) + " " + name + " " + Integer.toString(getMybytearray.length * getMybytearray[0].length));
-                        studentMap.get(toReceive).os.writeObject(Integer.toString(fileID) + " " + name + " " + Integer.toString(getMybytearray.length * getMybytearray[0].length));
-
-                //        os.writeObject(Integer.toString(getMybytearray.length * getMybytearray[0].length));
-                        os.writeObject("done here by receiving "+toLastPrint);
-                        arrayO[fileID] = getMybytearray;
-                        fileID++;
-                        System.out.println("y");
-                        continue;
-                    } else {
-                        os.writeObject("ServerResponseCHUNK_RECEIVED "+current);
-                    }
+                if(current!=Integer.valueOf(deStuffedSeq)) {
+                    System.out.println("Frame re-received " + Integer.valueOf(deStuffedSeq));
+                    current=Integer.valueOf(deStuffedSeq);
                 }
+                current += 1;
+                if (current >= chunks) {
+                    int toLastPrint=current-1;
+                    isReading = false;
+                    current = 0;
+                    if (studentMap.get(toReceive) == null) {
+                        os.writeObject("USER NOT AVAILABLE");
+                        continue;
+                    }
+                    System.out.println(Integer.toString(fileID) + " " + name + " " + Integer.toString(getMybytearray.length * getMybytearray[0].length));
+                    studentMap.get(toReceive).os.writeObject(Integer.toString(fileID) + " " + name + " " + Integer.toString(getMybytearray.length * getMybytearray[0].length));
+                //        os.writeObject(Integer.toString(getMybytearray.length * getMybytearray[0].length));
+                    os.writeObject("done here by receiving "+toLastPrint);
+                    arrayO[fileID] = getMybytearray;
+                    fileID++;
+                    System.out.println("y");
+                    continue;
+                } else {
+                    os.writeObject("ServerResponseCHUNK_RECEIVED "+current);
+                }
+            }
                 ////////   ////////ajker full kaj eitukur moddhei  :p :p yolo
 
 

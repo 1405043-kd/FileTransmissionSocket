@@ -3,6 +3,7 @@
  */
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -42,9 +43,11 @@ public class Client implements Runnable,Serializable{
 
         try {
             clientSocket = new Socket(host, portNumber);
+
             inputLine = new BufferedReader(new InputStreamReader(System.in));
             os = new ObjectOutputStream(clientSocket.getOutputStream());
             is = new ObjectInputStream(clientSocket.getInputStream());
+            //clientSocket.setSoTimeout(30000);
         } catch (UnknownHostException e) {
             System.err.println("Unknown host " + host);
         } catch (IOException e) {
@@ -338,8 +341,6 @@ public class Client implements Runnable,Serializable{
                 //bitStuff(arrayO[curr]);
                 try {
 
-
-
                     String toSendString=toBinary(arrayO[curr])+'c'+checkSum(toBinary(arrayO[curr]))+'c'+curr;
                     System.out.println("Frame to send : "+ toSendString);
                 //    System.out.println("Bits to send - Stuffed : "+ bitStuff(toBinary(arrayO[curr])));
@@ -349,7 +350,8 @@ public class Client implements Runnable,Serializable{
                 //    os.writeObject(toSendString);
                     System.out.println("Frame no. "+curr+ " sent to server");
 
-                } catch (IOException e) {
+                }
+                catch (IOException e){
                     e.printStackTrace();
                 }
                 /*
@@ -362,7 +364,27 @@ public class Client implements Runnable,Serializable{
            //     long testTime = System.currentTimeMillis();
                 try {
                     response = (String) is.readObject();
-                } catch (IOException e) {
+                    System.out.println(response);
+                    if (!response.contains("ServerResponseCHUNK_RECEIVED")) {
+                        if(response.contains("resendFrame") ) {
+                            curr=Integer.valueOf(response.replaceAll("[^0-9]", ""));
+                            continue;
+                        }
+                        else {
+                            //         System.out.println(response);
+                            curr = 0;
+                            chunks = 0;
+                            isReading = false;
+                            // fileREAD = true;
+                            continue;
+                        }
+                    }
+                }
+                catch (SocketTimeoutException e) {
+                    curr-=1;
+                    System.out.println("TIMEOUT OCCURRED, SENDING AGAIN FRAME" +curr);
+                }
+                catch (IOException e) {
                     e.printStackTrace();
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
@@ -371,17 +393,8 @@ public class Client implements Runnable,Serializable{
                     response="ERROR";
                     System.out.println("TIME OUT");
                 } */
-                System.out.println(response);
 
 
-                if (!response.contains("ServerResponseCHUNK_RECEIVED")) {
-           //         System.out.println(response);
-                    curr = 0;
-                    chunks = 0;
-                    isReading = false;
-                   // fileREAD = true;
-                    continue;
-                }
             }
 
 
