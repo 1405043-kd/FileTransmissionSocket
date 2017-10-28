@@ -337,9 +337,17 @@ public class Client implements Runnable,Serializable{
             else if(isLogeed==true && isReading==true && fileREAD==false){
                 //bitStuff(arrayO[curr]);
                 try {
-                    System.out.println("Bits to send : "+ toBinary(arrayO[curr]));
-                    System.out.println("Bits to send - Stuffed : "+ bitStuff(arrayO[curr]));
-                    os.writeObject(bitStuff(arrayO[curr]));
+
+
+
+                    String toSendString=toBinary(arrayO[curr])+'c'+checkSum(toBinary(arrayO[curr]))+'c'+curr;
+                    System.out.println("Frame to send : "+ toSendString);
+                //    System.out.println("Bits to send - Stuffed : "+ bitStuff(toBinary(arrayO[curr])));
+                    System.out.println("Frame to send - Stuffed : " + bitStuff(toSendString));
+                 //   os.writeObject(bitStuff(toBinary(arrayO[curr])));
+                    os.writeObject(bitStuff(toSendString));
+                //    os.writeObject(toSendString);
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -463,10 +471,12 @@ public class Client implements Runnable,Serializable{
             System.err.println("IOException:  " + e);
         }
     } */
-  public long CheckSum(byte[] byteArr){
-        long count=0;
-        for(int i=0;i<byteArr.length;i++){
-            if(byteArr[i]>count) count=byteArr[i];
+  public int checkSum(String string){
+        int count=0;
+        for(int i=0;i<string.length();i++){
+            if(string.charAt(i)=='1'){
+                count++;
+            }
         }
         return count;
   }
@@ -514,33 +524,45 @@ public class Client implements Runnable,Serializable{
     }
 
 
-  public String bitStuff(byte[] byteArr){
+  public String bitStuff(String byteArr){
         String s="";
         String returnString="";
-        int counter=0;
-        s=toBinary(byteArr);
+        int counter=0,flag=0;
+        s=byteArr;
         for(int i=0;i<s.length();i++)
         {
           if(s.charAt(i) == '1')
           {
-              counter++;
               returnString = returnString + s.charAt(i);
+              counter++;
           }
-          else
+          else if(s.charAt(i)=='0')
           {
               returnString = returnString + s.charAt(i);
               counter = 0;
+          }
+
+          else if(s.charAt(i)=='c')
+          {
+              returnString = returnString + 'c';
+              counter=0;
+          }
+          else{
+              returnString=returnString+s.charAt(i);
+              counter=0;
           }
           if(counter == 5)
           {
-              returnString = returnString + '0';
-              counter = 0;
+                returnString = returnString + '0';
+                counter = 0;
           }
+
+
       }
       return "01111110"+returnString+"01111110";
   }
 
-    public byte[] bitDeStuff(String s){
+    public String bitDeStuff(String s){
         //String s="";
         String returnString="";
         s=s.replace("01111110","");
@@ -548,7 +570,6 @@ public class Client implements Runnable,Serializable{
 
         for(int i=0;i<s.length();i++)
         {
-
             if(s.charAt(i) == '1')
             {
 
@@ -556,10 +577,14 @@ public class Client implements Runnable,Serializable{
                 returnString = returnString + s.charAt(i);
 
             }
-            else
+            else if(s.charAt(i) == '0')
             {
                 returnString = returnString + s.charAt(i);
                 counter = 0;
+            }
+            else {
+                returnString = returnString + s.charAt(i);
+                counter=0;
             }
             if(counter == 5)
             {
@@ -571,8 +596,8 @@ public class Client implements Runnable,Serializable{
                 counter = 1;
             }
         }
-        return fromBinary(returnString);
-      //  return returnString;
+        //   return fromBinary(returnString);
+        return returnString;
     }
 
 }

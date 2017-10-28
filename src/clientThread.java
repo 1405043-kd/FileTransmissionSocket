@@ -171,7 +171,7 @@ class clientThread extends Thread implements Serializable {
                        // mybytearray = (byte[]) is.readObject();
                         stuffedString=(String) is.readObject();
                     }
-              deStuffedString=bitDeStuff(stuffedString);
+                deStuffedString=bitDeStuff(stuffedString);
                 System.out.println("received Pack "+stuffedString);
                 System.out.println("received Pack - Destuffed "+deStuffedString);
 
@@ -180,8 +180,15 @@ class clientThread extends Thread implements Serializable {
             //            System.out.println("TIME OUT");
              //       }
                //     else {
+                String[] parts = deStuffedString.split("c");
+                String deStuffedBinary = parts[0]; // 004
+                String deStuffedCheckSum = parts[1];
+                String deStuffedSeq= parts[2];
+                System.out.println(deStuffedBinary);
+                System.out.println(deStuffedCheckSum);
+                System.out.println(deStuffedSeq);
 
-                mybytearray=fromBinary(deStuffedString);
+                mybytearray=fromBinary(deStuffedBinary);
                 System.out.println(mybytearray);
                 getMybytearray[current] = mybytearray;
              //       }
@@ -251,10 +258,12 @@ class clientThread extends Thread implements Serializable {
         }
     }
 
-    public long CheckSum(byte[] byteArr){
-        long count=0;
-        for(int i=0;i<byteArr.length;i++){
-            if(byteArr[i]>count) count=byteArr[i];
+    public int checkSum(String string){
+        int count=0;
+        for(int i=0;i<string.length();i++){
+            if(string.charAt(i)=='1'){
+                count++;
+            }
         }
         return count;
     }
@@ -302,28 +311,40 @@ class clientThread extends Thread implements Serializable {
     }
 
 
-    public String bitStuff(byte[] byteArr){
+    public String bitStuff(String byteArr){
         String s="";
         String returnString="";
-        int counter=0;
-        s=toBinary(byteArr);
+        int counter=0,flag=0;
+        s=byteArr;
         for(int i=0;i<s.length();i++)
         {
             if(s.charAt(i) == '1')
             {
-                counter++;
                 returnString = returnString + s.charAt(i);
+                counter++;
             }
-            else
+            else if(s.charAt(i)=='0')
             {
                 returnString = returnString + s.charAt(i);
                 counter = 0;
+            }
+
+            else if(s.charAt(i)=='c')
+            {
+                returnString = returnString + 'c';
+                counter=0;
+            }
+            else{
+                returnString=returnString+s.charAt(i);
+                counter=0;
             }
             if(counter == 5)
             {
                 returnString = returnString + '0';
                 counter = 0;
             }
+
+
         }
         return "01111110"+returnString+"01111110";
     }
@@ -336,7 +357,6 @@ class clientThread extends Thread implements Serializable {
 
         for(int i=0;i<s.length();i++)
         {
-
             if(s.charAt(i) == '1')
             {
 
@@ -344,10 +364,14 @@ class clientThread extends Thread implements Serializable {
                 returnString = returnString + s.charAt(i);
 
             }
-            else
+            else if(s.charAt(i) == '0')
             {
                 returnString = returnString + s.charAt(i);
                 counter = 0;
+            }
+            else {
+                returnString = returnString + s.charAt(i);
+                counter=0;
             }
             if(counter == 5)
             {
