@@ -347,6 +347,7 @@ public class Client implements Runnable,Serializable{
                  //   os.writeObject(bitStuff(toBinary(arrayO[curr])));
                     os.writeObject(bitStuff(toSendString));
                 //    os.writeObject(toSendString);
+                    System.out.println("Frame no. "+curr+ " sent to server");
 
                 } catch (IOException e) {
                     e.printStackTrace();

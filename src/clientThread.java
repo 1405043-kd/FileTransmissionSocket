@@ -89,7 +89,7 @@ class clientThread extends Thread implements Serializable {
                                   threads[j].os.writeObject("Student ID " + name + " online now");
                               }
                           }  */
-                           System.out.println("hi hi");
+    //                       System.out.println("hi hi");
                            break;
                        }
                        else if (threads[i] == this && studentMap.get(name) != null) {
@@ -172,8 +172,8 @@ class clientThread extends Thread implements Serializable {
                         stuffedString=(String) is.readObject();
                     }
                 deStuffedString=bitDeStuff(stuffedString);
-                System.out.println("received Pack "+stuffedString);
-                System.out.println("received Pack - Destuffed "+deStuffedString);
+                System.out.println("received Frame : "+stuffedString);
+                System.out.println("received Frame - Destuffed : "+deStuffedString);
 
            //         if(testTime >= (System.currentTimeMillis()+ 29*1000)) { //multiply by 1000 to get milliseconds
             //            current=chunks+1;
@@ -184,12 +184,15 @@ class clientThread extends Thread implements Serializable {
                 String deStuffedBinary = parts[0]; // 004
                 String deStuffedCheckSum = parts[1];
                 String deStuffedSeq= parts[2];
-                System.out.println(deStuffedBinary);
-                System.out.println(deStuffedCheckSum);
-                System.out.println(deStuffedSeq);
-
+                System.out.println("payLoad : "+deStuffedBinary);
+                System.out.println("checkSum : "+deStuffedCheckSum );
+                System.out.println("seqNumber : "+deStuffedSeq);
+                if(hasCheckSumError(deStuffedBinary, Integer.valueOf(deStuffedCheckSum))==true)
+                    System.out.println("No checkSum error found");
+                else
+                    System.out.println("Error Error Error Danger :o checkSum error found");
                 mybytearray=fromBinary(deStuffedBinary);
-                System.out.println(mybytearray);
+             //   System.out.println(mybytearray);
                 getMybytearray[current] = mybytearray;
              //       }
                     current += 1;
@@ -220,7 +223,7 @@ class clientThread extends Thread implements Serializable {
 
 
             else if(isReading==false && isWriting==true) {
-                System.out.println("came_here!!" + chunks);
+ //               System.out.println("came_here!!" + chunks);
                 line = "";
                 line = (String) is.readObject();
                 if(line.contains("startSending")) {
@@ -385,6 +388,13 @@ class clientThread extends Thread implements Serializable {
         }
      //   return fromBinary(returnString);
           return returnString;
+    }
+    boolean hasCheckSumError(String binaryString, int sumFrame){
+        if(checkSum(binaryString)==sumFrame){
+            return true;
+        }
+        else
+            return false;
     }
 
 }
