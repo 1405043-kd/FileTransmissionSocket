@@ -7,6 +7,7 @@ import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.concurrent.TimeoutException;
 
 import static com.sun.org.apache.xalan.internal.lib.ExsltStrings.split;
 
@@ -43,11 +44,11 @@ public class Client implements Runnable,Serializable{
 
         try {
             clientSocket = new Socket(host, portNumber);
-
+            clientSocket.setSoTimeout(30000);
             inputLine = new BufferedReader(new InputStreamReader(System.in));
             os = new ObjectOutputStream(clientSocket.getOutputStream());
             is = new ObjectInputStream(clientSocket.getInputStream());
-            //clientSocket.setSoTimeout(30000);
+
         } catch (UnknownHostException e) {
             System.err.println("Unknown host " + host);
         } catch (IOException e) {
@@ -277,7 +278,11 @@ public class Client implements Runnable,Serializable{
             else if(isLogeed==true && isReading==false && fileREAD==false) {
                 try {
                     response = (String) is.readObject();
-                } catch (IOException e) {
+                }
+                catch (SocketTimeoutException t){
+                    continue;
+                }
+                catch (IOException e) {
                     e.printStackTrace();
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
