@@ -3,6 +3,8 @@ import java.net.Socket;
 import java.util.BitSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.zip.CRC32;
+import java.util.zip.Checksum;
 
 /**
  * Created by USER on 9/28/2017.
@@ -187,9 +189,9 @@ class clientThread extends Thread implements Serializable {
                 System.out.println("payLoad : "+deStuffedBinary);
                 System.out.println("checkSum : "+deStuffedCheckSum );
                 System.out.println("seqNumber : "+deStuffedSeq);
-                if(hasCheckSumError(deStuffedBinary, Integer.valueOf(deStuffedCheckSum))==false)
+                if(hasCheckSumError(deStuffedBinary, Long.parseLong(deStuffedCheckSum))==false)
                     System.out.println("No checkSum error found");
-                else { 
+                else {
                     System.out.println("Error Error Error Danger :o checkSum error found");
                     os.writeObject("resendFrame "+current);
                     continue;
@@ -269,14 +271,20 @@ class clientThread extends Thread implements Serializable {
         }
     }
 
-    public int checkSum(String string){
+    public long checkSum(String string){
         int count=0;
-        for(int i=0;i<string.length();i++){
+        long returnValue;
+        byte byteArr[] = new byte[(string.length()+7)/8];
+        byteArr=fromBinaryStringToByteArray(string);
+        Checksum checksum = new CRC32();
+        checksum.update(byteArr,0,byteArr.length);
+        returnValue= checksum.getValue();
+      /*for(int i=0;i<string.length();i++){
             if(string.charAt(i)=='1'){
                 count++;
             }
-        }
-        return count;
+        }*/
+        return returnValue;
     }
     public String byteArrayToString(byte[] byteArr){
         //byte[] b = new byte[]{10};
@@ -384,7 +392,7 @@ class clientThread extends Thread implements Serializable {
      //   return fromBinaryStringToByteArray(returnString);
           return returnString;
     }
-    boolean hasCheckSumError(String binaryString, int sumFrame){
+    boolean hasCheckSumError(String binaryString, long sumFrame){
         if(checkSum(binaryString)==sumFrame){
             return false;
         }

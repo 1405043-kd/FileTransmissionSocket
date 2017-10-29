@@ -6,6 +6,8 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.BitSet;
+import java.util.zip.CRC32;
+import java.util.zip.Checksum;
 
 import static com.sun.org.apache.xalan.internal.lib.ExsltStrings.split;
 
@@ -489,14 +491,20 @@ public class Client implements Runnable,Serializable{
             System.err.println("IOException:  " + e);
         }
     } */
-  public int checkSum(String string){
+  public long checkSum(String string){
         int count=0;
-        for(int i=0;i<string.length();i++){
+        long returnValue;
+        byte byteArr[] = new byte[(string.length()+7)/8];
+        byteArr=fromBinaryStringToByteArray(string);
+        Checksum checksum = new CRC32();
+        checksum.update(byteArr,0,byteArr.length);
+        returnValue= checksum.getValue();
+      /*for(int i=0;i<string.length();i++){
             if(string.charAt(i)=='1'){
                 count++;
             }
-        }
-        return count;
+        }*/
+        return returnValue;
   }
   public String byteArrayToString(byte[] byteArr){
       //byte[] b = new byte[]{10};
