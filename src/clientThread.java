@@ -189,7 +189,7 @@ class clientThread extends Thread implements Serializable {
                 System.out.println("seqNumber : "+deStuffedSeq);
                 if(hasCheckSumError(deStuffedBinary, Integer.valueOf(deStuffedCheckSum))==false)
                     System.out.println("No checkSum error found");
-                else {
+                else { 
                     System.out.println("Error Error Error Danger :o checkSum error found");
                     os.writeObject("resendFrame "+current);
                     continue;
