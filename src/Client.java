@@ -5,9 +5,7 @@ import java.io.*;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
-import java.util.Arrays;
 import java.util.BitSet;
-import java.util.concurrent.TimeoutException;
 
 import static com.sun.org.apache.xalan.internal.lib.ExsltStrings.split;
 
@@ -346,11 +344,11 @@ public class Client implements Runnable,Serializable{
                 //bitStuff(arrayO[curr]);
                 try {
 
-                    String toSendString=toBinary(arrayO[curr])+'c'+checkSum(toBinary(arrayO[curr]))+'c'+curr;
+                    String toSendString= fromByteArrayToBinaryString(arrayO[curr])+'c'+checkSum(fromByteArrayToBinaryString(arrayO[curr]))+'c'+curr;
                     System.out.println("Frame to send : "+ toSendString);
-                //    System.out.println("Bits to send - Stuffed : "+ bitStuff(toBinary(arrayO[curr])));
+                //    System.out.println("Bits to send - Stuffed : "+ bitStuff(fromByteArrayToBinaryString(arrayO[curr])));
                     System.out.println("Frame to send - Stuffed : " + bitStuff(toSendString));
-                 //   os.writeObject(bitStuff(toBinary(arrayO[curr])));
+                 //   os.writeObject(bitStuff(fromByteArrayToBinaryString(arrayO[curr])));
                     os.writeObject(bitStuff(toSendString));
                 //    os.writeObject(toSendString);
                     System.out.println("Frame no. "+curr+ " sent to server");
@@ -417,12 +415,12 @@ public class Client implements Runnable,Serializable{
                 }
                 System.out.println("receivedFileCHUNK "+curr);
             //    System.out.println( byteArrayToString(arrayO[curr]));
-             //   if(bitDeStuff(bitStuff(arrayO[curr])).equals(toBinary(arrayO[curr]))) System.out.println("yoho");
+             //   if(bitDeStuff(bitStuff(arrayO[curr])).equals(fromByteArrayToBinaryString(arrayO[curr]))) System.out.println("yoho");
              //   System.out.println(bitDeStuff(bitStuff(arrayO[curr])));
-             //   System.out.println(toBinary(arrayO[curr]));
+             //   System.out.println(fromByteArrayToBinaryString(arrayO[curr]));
             //    if(Arrays.equals(bitDeStuff(bitStuff(arrayO[curr])),arrayO[curr])) System.out.println("yoloho");
               //  System.out.println(byteArrayToString(stringToByteArray(byteArrayToString(arrayO[curr]))));
-                 System.out.println(toBinary(arrayO[curr]));
+                 System.out.println(fromByteArrayToBinaryString(arrayO[curr]));
                 curr++;
                 if(curr>=chunks){
                     fileREAD=false;
@@ -525,22 +523,21 @@ public class Client implements Runnable,Serializable{
       return bytes;
 
   }
-    String toBinary( byte[] bytes ) {
-        StringBuilder sb = new StringBuilder(bytes.length * Byte.SIZE);
-        for( int i = 0; i < Byte.SIZE * bytes.length; i++ )
-            sb.append((bytes[i / Byte.SIZE] << i % Byte.SIZE & 0x80) == 0 ? '0' : '1');
-        return sb.toString();
+    String fromByteArrayToBinaryString(byte[] bytes){
+        String s="";
+        for(int i=0; i<8*bytes.length; i++){
+            if((bytes[i/8]<< i%8 & 0x80)==0)
+                s+='0';
+            else s+='1';
+        }
+        return s;
     }
-    byte[] fromBinary( String s ) {
-        int sLen = s.length();
-        byte[] toReturn = new byte[(sLen + Byte.SIZE - 1) / Byte.SIZE];
-        char c;
-        for( int i = 0; i < sLen; i++ )
-            if( (c = s.charAt(i)) == '1' )
-                toReturn[i / Byte.SIZE] = (byte) (toReturn[i / Byte.SIZE] | (0x80 >>> (i % Byte.SIZE)));
-            else if ( c != '0' )
-                throw new IllegalArgumentException();
-        return toReturn;
+    byte[] fromBinaryStringToByteArray(String s){
+        byte[] returnByteArr = new byte[(s.length()+8-1)/8];
+        for(int i = 0; i < s.length(); i++)
+            if(s.charAt(i) == '1')
+                returnByteArr[i/8] = (byte)(returnByteArr[i/8]|(0x80>>>(i%8)));
+        return returnByteArr;
     }
 
 
@@ -549,33 +546,27 @@ public class Client implements Runnable,Serializable{
         String returnString="";
         int counter=0,flag=0;
         s=byteArr;
-        for(int i=0;i<s.length();i++)
-        {
-          if(s.charAt(i) == '1')
-          {
-              returnString = returnString + s.charAt(i);
-              counter++;
-          }
-          else if(s.charAt(i)=='0')
-          {
-              returnString = returnString + s.charAt(i);
-              counter = 0;
-          }
-
-          else if(s.charAt(i)=='c')
-          {
-              returnString = returnString + 'c';
-              counter=0;
-          }
-          else{
-              returnString=returnString+s.charAt(i);
-              counter=0;
-          }
-          if(counter == 5)
-          {
+        for(int i=0;i<s.length();i++) {
+            if(s.charAt(i) == '1'){
+                returnString = returnString + s.charAt(i);
+                counter++;
+            }
+            else if(s.charAt(i)=='0') {
+                returnString = returnString + s.charAt(i);
+                counter = 0;
+            }
+            else if(s.charAt(i)=='c') {
+                returnString = returnString + 'c';
+                counter=0;
+            }
+            else{
+                returnString=returnString+s.charAt(i);
+                counter=0;
+            }
+            if(counter == 5) {
                 returnString = returnString + '0';
                 counter = 0;
-          }
+            }
 
 
       }
@@ -587,27 +578,21 @@ public class Client implements Runnable,Serializable{
         String returnString="";
         s=s.replace("01111110","");
         int counter=0;
-
-        for(int i=0;i<s.length();i++)
-        {
-            if(s.charAt(i) == '1')
-            {
-
+        for(int i=0;i<s.length();i++){
+            if(s.charAt(i) == '1') {
                 counter++;
                 returnString = returnString + s.charAt(i);
 
             }
-            else if(s.charAt(i) == '0')
-            {
+            else if(s.charAt(i) == '0'){
                 returnString = returnString + s.charAt(i);
                 counter = 0;
             }
-            else {
+            else{
                 returnString = returnString + s.charAt(i);
                 counter=0;
             }
-            if(counter == 5)
-            {
+            if(counter == 5){
                 if((i+2)!=s.length())
                     returnString = returnString + s.charAt(i+2);
                 else
@@ -616,7 +601,7 @@ public class Client implements Runnable,Serializable{
                 counter = 1;
             }
         }
-        //   return fromBinary(returnString);
+        //   return fromBinaryStringToByteArray(returnString);
         return returnString;
     }
 

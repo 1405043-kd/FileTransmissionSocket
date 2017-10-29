@@ -187,14 +187,14 @@ class clientThread extends Thread implements Serializable {
                 System.out.println("payLoad : "+deStuffedBinary);
                 System.out.println("checkSum : "+deStuffedCheckSum );
                 System.out.println("seqNumber : "+deStuffedSeq);
-                if(hasCheckSumError(deStuffedBinary, Integer.valueOf(deStuffedCheckSum))==true)
+                if(hasCheckSumError(deStuffedBinary, Integer.valueOf(deStuffedCheckSum))==false)
                     System.out.println("No checkSum error found");
                 else {
                     System.out.println("Error Error Error Danger :o checkSum error found");
                     os.writeObject("resendFrame "+current);
                     continue;
                 }
-                mybytearray=fromBinary(deStuffedBinary);
+                mybytearray= fromBinaryStringToByteArray(deStuffedBinary);
              //   System.out.println(mybytearray);
                 getMybytearray[Integer.valueOf(deStuffedSeq)] = mybytearray;
              //       }
@@ -303,22 +303,22 @@ class clientThread extends Thread implements Serializable {
         return bytes;
 
     }
-    String toBinary( byte[] bytes ) {
-        StringBuilder sb = new StringBuilder(bytes.length * Byte.SIZE);
-        for( int i = 0; i < Byte.SIZE * bytes.length; i++ )
-            sb.append((bytes[i / Byte.SIZE] << i % Byte.SIZE & 0x80) == 0 ? '0' : '1');
-        return sb.toString();
+    String fromByteArrayToBinaryString(byte[] bytes ) {
+        String s="";
+        for(int i=0; i<8*bytes.length;i++) {
+            if((bytes[i/8]<< i%8 & 0x80)==0)
+                s+='0';
+            else s+='1';
+            ;
+        }
+        return s;
     }
-    byte[] fromBinary( String s ) {
-        int sLen = s.length();
-        byte[] toReturn = new byte[(sLen + Byte.SIZE - 1) / Byte.SIZE];
-        char c;
-        for( int i = 0; i < sLen; i++ )
-            if( (c = s.charAt(i)) == '1' )
-                toReturn[i / Byte.SIZE] = (byte) (toReturn[i / Byte.SIZE] | (0x80 >>> (i % Byte.SIZE)));
-            else if ( c != '0' )
-                throw new IllegalArgumentException();
-        return toReturn;
+    byte[] fromBinaryStringToByteArray(String s ) {
+        byte[] returnByteArr = new byte[(s.length()+8-1)/8];
+        for(int i = 0; i < s.length(); i++)
+            if(s.charAt(i) == '1')
+                returnByteArr[i/8] = (byte)(returnByteArr[i/8]|(0x80>>>(i%8)));
+        return returnByteArr;
     }
 
 
@@ -327,21 +327,17 @@ class clientThread extends Thread implements Serializable {
         String returnString="";
         int counter=0,flag=0;
         s=byteArr;
-        for(int i=0;i<s.length();i++)
-        {
-            if(s.charAt(i) == '1')
-            {
+        for(int i=0;i<s.length();i++){
+            if(s.charAt(i) == '1') {
                 returnString = returnString + s.charAt(i);
                 counter++;
             }
-            else if(s.charAt(i)=='0')
-            {
+            else if(s.charAt(i)=='0'){
                 returnString = returnString + s.charAt(i);
                 counter = 0;
             }
 
-            else if(s.charAt(i)=='c')
-            {
+            else if(s.charAt(i)=='c'){
                 returnString = returnString + 'c';
                 counter=0;
             }
@@ -349,12 +345,10 @@ class clientThread extends Thread implements Serializable {
                 returnString=returnString+s.charAt(i);
                 counter=0;
             }
-            if(counter == 5)
-            {
+            if(counter == 5){
                 returnString = returnString + '0';
                 counter = 0;
             }
-
 
         }
         return "01111110"+returnString+"01111110";
@@ -365,18 +359,12 @@ class clientThread extends Thread implements Serializable {
         String returnString="";
         s=s.replace("01111110","");
         int counter=0;
-
-        for(int i=0;i<s.length();i++)
-        {
-            if(s.charAt(i) == '1')
-            {
-
+        for(int i=0;i<s.length();i++){
+            if(s.charAt(i) == '1') {
                 counter++;
                 returnString = returnString + s.charAt(i);
-
             }
-            else if(s.charAt(i) == '0')
-            {
+            else if(s.charAt(i) == '0') {
                 returnString = returnString + s.charAt(i);
                 counter = 0;
             }
@@ -384,8 +372,7 @@ class clientThread extends Thread implements Serializable {
                 returnString = returnString + s.charAt(i);
                 counter=0;
             }
-            if(counter == 5)
-            {
+            if(counter == 5){
                 if((i+2)!=s.length())
                     returnString = returnString + s.charAt(i+2);
                 else
@@ -394,15 +381,15 @@ class clientThread extends Thread implements Serializable {
                 counter = 1;
             }
         }
-     //   return fromBinary(returnString);
+     //   return fromBinaryStringToByteArray(returnString);
           return returnString;
     }
     boolean hasCheckSumError(String binaryString, int sumFrame){
         if(checkSum(binaryString)==sumFrame){
-            return true;
+            return false;
         }
         else
-            return false;
+            return true;
     }
 
 }
