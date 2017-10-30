@@ -272,19 +272,25 @@ class clientThread extends Thread implements Serializable {
     }
 
     public long checkSum(String string){
-        int count=0;
-        long returnValue;
+     //   int count=0;
+      //  long returnValue;
         byte byteArr[] = new byte[(string.length()+7)/8];
         byteArr=fromBinaryStringToByteArray(string);
-        Checksum checksum = new CRC32();
+       /* Checksum checksum = new CRC32();
         checksum.update(byteArr,0,byteArr.length);
-        returnValue= checksum.getValue();
+        returnValue= checksum.getValue(); */
+        long sum = 0;
+        for (byte b : byteArr) {
+            sum ^= b;
+        }
+        return sum%(string.length()+7)/8;
+
       /*for(int i=0;i<string.length();i++){
             if(string.charAt(i)=='1'){
                 count++;
             }
         }*/
-        return returnValue;
+        //return returnValue;
     }
     public String byteArrayToString(byte[] byteArr){
         //byte[] b = new byte[]{10};
