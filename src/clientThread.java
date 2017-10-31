@@ -281,11 +281,11 @@ class clientThread extends Thread implements Serializable {
        /* Checksum checksum = new CRC32();
         checksum.update(byteArr,0,byteArr.length);
         returnValue= checksum.getValue(); */
-        long sum = 0;
+        long retValue = 1;
         for (byte b : byteArr) {
-            sum ^= b;
+            retValue^=b;
         }
-        return sum%(string.length()+7)/8;
+        return retValue%(string.length()+7)/8;
 
       /*for(int i=0;i<string.length();i++){
             if(string.charAt(i)=='1'){

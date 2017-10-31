@@ -353,9 +353,9 @@ public class Client implements Runnable,Serializable{
                 //    System.out.println("Bits to send - Stuffed : "+ bitStuff(fromByteArrayToBinaryString(arrayO[curr])));
                     System.out.println("Frame to send - Stuffed : " + bitStuff(toSendString));
                  //   os.writeObject(bitStuff(fromByteArrayToBinaryString(arrayO[curr])));
-                    if(curr%13==0 && curr!=0 &&errorFlag==true) {
+                    if(curr%13==0 && errorFlag==true) {
                         String errorFrame=toSendString;
-                        errorFrame=errorFrame.replaceAll("101","111");
+                        errorFrame=errorFrame.replaceAll("1001","0111");
                         os.writeObject(bitStuff(errorFrame));
                         errorFlag=false;
                     }
@@ -510,11 +510,11 @@ public class Client implements Runnable,Serializable{
        /* Checksum checksum = new CRC32();
         checksum.update(byteArr,0,byteArr.length);
         returnValue= checksum.getValue(); */
-      long sum = 0;
+      long retValue = 1;
       for (byte b : byteArr) {
-          sum ^= b;
+          retValue ^=b;
       }
-      return sum%(string.length()+7)/8;
+      return retValue%(string.length()+7)/8;
 
       /*for(int i=0;i<string.length();i++){
             if(string.charAt(i)=='1'){
