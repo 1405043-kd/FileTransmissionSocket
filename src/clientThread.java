@@ -3,6 +3,7 @@ import java.net.Socket;
 import java.util.BitSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import static java.lang.System.out;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
@@ -222,7 +223,7 @@ class clientThread extends Thread implements Serializable {
                     System.out.println("y");
                     continue;
                 } else {
-                    os.writeObject("ServerResponseCHUNK_RECEIVED "+current);
+                    os.writeObject("ServerResponseCHUNK_RECEIVED "+(current-1));
                 }
             }
                 ////////   ////////ajker full kaj eitukur moddhei  :p :p yolo

@@ -6,6 +6,7 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.BitSet;
+import static java.lang.System.out;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
@@ -35,6 +36,7 @@ public class Client implements Runnable,Serializable{
     private static String senderName="";
     private static File fileDown=null;
     private static String fileDownloadPath=null;
+    public boolean errorFlag=false;
     public static void main(String[] args) {
 
 
@@ -351,7 +353,16 @@ public class Client implements Runnable,Serializable{
                 //    System.out.println("Bits to send - Stuffed : "+ bitStuff(fromByteArrayToBinaryString(arrayO[curr])));
                     System.out.println("Frame to send - Stuffed : " + bitStuff(toSendString));
                  //   os.writeObject(bitStuff(fromByteArrayToBinaryString(arrayO[curr])));
-                    os.writeObject(bitStuff(toSendString));
+                    if(curr%13==0 && curr!=0 &&errorFlag==true) {
+                        String errorFrame=toSendString;
+                        errorFrame=errorFrame.replaceAll("101","111");
+                        os.writeObject(bitStuff(errorFrame));
+                        errorFlag=false;
+                    }
+                    else {
+                        os.writeObject(bitStuff(toSendString));
+                        errorFlag=true;
+                    }
                 //    os.writeObject(toSendString);
                     System.out.println("Frame no. "+curr+ " sent to server");
 
