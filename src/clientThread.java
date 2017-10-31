@@ -194,7 +194,7 @@ class clientThread extends Thread implements Serializable {
                 if(hasCheckSumError(deStuffedBinary, Long.parseLong(deStuffedCheckSum))==false)
                     System.out.println("No checkSum error found");
                 else {
-                    System.out.println("Error Error Error Danger :o checkSum error found");
+                    System.out.println("XXXXXXXXXXXXXXX Error Error Error Danger :o checkSum error found XXXXXXXXXXXXXXXXX");
                     os.writeObject("resendFrame "+current);
                     continue;
                 }
