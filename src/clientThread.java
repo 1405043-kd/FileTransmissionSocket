@@ -187,9 +187,10 @@ class clientThread extends Thread implements Serializable {
                 String deStuffedBinary = parts[0]; // 004
                 String deStuffedCheckSum = parts[1];
                 String deStuffedSeq= parts[2];
-                System.out.println("payLoad : "+deStuffedBinary);
-                System.out.println("checkSum : "+deStuffedCheckSum );
                 System.out.println("seqNumber : "+deStuffedSeq);
+                System.out.println("payLoad : "+deStuffedBinary);
+                System.out.println("receivedCheckSum : "+deStuffedCheckSum );
+                System.out.println("calculatedCheckSum : "+checkSum(deStuffedBinary));
                 if(hasCheckSumError(deStuffedBinary, Long.parseLong(deStuffedCheckSum))==false)
                     System.out.println("No checkSum error found");
                 else {
