@@ -380,7 +380,7 @@ public class Client implements Runnable,Serializable{
            //     long testTime = System.currentTimeMillis();
                 try {
                     response = (String) is.readObject();
-                    System.out.println(response);
+                    System.out.println("SERVER RESPONSE: "+ response);
                     if (!response.contains("ServerResponseCHUNK_RECEIVED")) {
                         if(response.contains("resendFrame") ) {
                             curr=Integer.valueOf(response.replaceAll("[^0-9]", ""));
